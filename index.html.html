@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shazz Theory — The Universe Decoded</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Space+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --void: #03040a;
+      --deep: #070b1a;
+      --cosmos: #0d1530;
+      --gold: #c8a96e;
+      --gold-light: #e8d08f;
+      --cyan: #4ecdc4;
+      --violet: #7b5ea7;
+      --rose: #c94077;
+      --text: #d4cfc7;
+      --text-dim: #7a7670;
+      --border: rgba(200,169,110,0.18);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--void);
+      color: var(--text);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* CUSTOM CURSOR */
+    .cursor {
+      position: fixed;
+      width: 10px; height: 10px;
+      background: var(--gold);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s, background 0.2s;
+      mix-blend-mode: difference;
+    }
+    .cursor-trail {
+      position: fixed;
+      width: 30px; height: 30px;
+      border: 1px solid rgba(200,169,110,0.4);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: left 0.15s ease, top 0.15s ease;
+    }
+
+    /* CANVAS STARFIELD */
+    #starfield {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.4rem 4rem;
+      background: linear-gradient(to bottom, rgba(3,4,10,0.95), transparent);
+      backdrop-filter: blur(2px);
+    }
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      color: var(--gold);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--cyan); }
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+
+    /* HERO */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 4rem;
+      overflow: hidden;
+    }
+    .hero-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 1s 0.3s forwards;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(4rem, 11vw, 10rem);
+      font-weight: 900;
+      line-height: 0.9;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      opacity: 0;
+      animation: fadeUp 1s 0.6s forwards;
+    }
+    .hero-title .line1 { display: block; color: var(--gold); }
+    .hero-title .line2 { display: block; color: white; font-style: italic; font-size: 0.55em; letter-spacing: 0.05em; }
+    .hero-sub {
+      max-width: 560px;
+      font-size: 1.2rem;
+      font-weight: 300;
+      line-height: 1.7;
+      color: var(--text-dim);
+      margin: 2rem auto 3rem;
+      opacity: 0;
+      animation: fadeUp 1s 0.9s forwards;
+    }
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 1rem 2.5rem;
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: all 0.4s;
+      opacity: 0;
+      animation: fadeUp 1s 1.2s forwards;
+    }
+    .hero-cta:hover {
+      background: var(--gold);
+      color: var(--void);
+    }
+    .hero-cta .arrow { transition: transform 0.3s; }
+    .hero-cta:hover .arrow { transform: translateX(5px); }
+
+    /* Glow orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.25;
+      pointer-events: none;
+    }
+    .orb-1 { width: 600px; height: 600px; background: var(--violet); top: -100px; left: -150px; }
+    .orb-2 { width: 400px; height: 400px; background: var(--cyan); bottom: 0; right: -100px; }
+    .orb-3 { width: 300px; height: 300px; background: var(--rose); top: 40%; left: 60%; }
+
+    /* DIVIDER */
+    .divider {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 1rem 0;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .divider-line { flex: 1; height: 1px; background: var(--border); }
+    .divider-symbol {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      color: var(--gold);
+      white-space: nowrap;
+    }
+
+    /* SECTIONS */
+    section { position: relative; z-index: 1; }
+
+    .section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 1rem;
+    }
+
+    /* INTRO STRIP */
+    .intro-strip {
+      padding: 5rem 4rem;
+      max-width: 1300px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: center;
+    }
+    .intro-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 4vw, 3.5rem);
+      font-weight: 700;
+      line-height: 1.15;
+      color: white;
+    }
+    .intro-heading em { font-style: italic; color: var(--gold); }
+    .intro-body { font-size: 1.05rem; line-height: 1.85; color: var(--text-dim); }
+    .intro-body p + p { margin-top: 1rem; }
+    .stat-row {
+      display: flex;
+      gap: 3rem;
+      margin-top: 2.5rem;
+    }
+    .stat { display: flex; flex-direction: column; gap: 0.3rem; }
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .stat-lbl {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* THEORY CARDS */
+    .theories {
+      padding: 6rem 4rem;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+    .theories-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+    .theories-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 900;
+      color: white;
+    }
+    .theories-header h2 em { font-style: italic; color: var(--gold); }
+    .theories-header p {
+      margin-top: 1rem;
+      font-size: 1.05rem;
+      color: var(--text-dim);
+      max-width: 540px;
+      margin-inline: auto;
+    }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+    .theory-card {
+      background: var(--deep);
+      padding: 2.8rem 2.4rem;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.4s;
+      cursor: default;
+    }
+    .theory-card:hover { background: var(--cosmos); }
+    .theory-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent-color, var(--gold));
+      transform: scaleX(0);
+      transition: transform 0.4s;
+    }
+    .theory-card:hover::after { transform: scaleX(1); }
+    .card-icon {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: var(--icon-bg, rgba(200,169,110,0.1));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .card-num {
+      position: absolute;
+      top: 1.5rem; right: 1.8rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+    }
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 0.8rem;
+      line-height: 1.2;
+    }
+    .card-body { font-size: 0.95rem; line-height: 1.75; color: var(--text-dim); }
+    .card-tag {
+      display: inline-block;
+      margin-top: 1.4rem;
+      padding: 0.3rem 0.9rem;
+      border: 1px solid var(--accent-color, var(--gold));
+      color: var(--accent-color, var(--gold));
+      font-family: 'Space Mono', monospace;
+      font-size: 0.58rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    /* VISUAL FEATURE — QUANTUM */
+    .feature-quantum {
+      padding: 8rem 4rem;
+      background: linear-gradient(135deg, var(--deep) 0%, var(--void) 100%);
+      overflow: hidden;
+    }
+    .feature-inner {
+      max-width: 1300px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 7rem;
+      align-items: center;
+    }
+    .feature-visual {
+      position: relative;
+      height: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .quantum-rings {
+      position: relative;
+      width: 340px; height: 340px;
+    }
+    .ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid transparent;
+      inset: 0;
+      margin: auto;
+      animation: spin linear infinite;
+    }
+    .ring:nth-child(1) {
+      width: 100%; height: 100%;
+      border-color: rgba(78,205,196,0.4);
+      animation-duration: 12s;
+    }
+    .ring:nth-child(2) {
+      width: 75%; height: 75%;
+      border-color: rgba(200,169,110,0.5);
+      animation-duration: 8s;
+      animation-direction: reverse;
+    }
+    .ring:nth-child(3) {
+      width: 52%; height: 52%;
+      border-color: rgba(123,94,167,0.6);
+      animation-duration: 5s;
+    }
+    .ring:nth-child(4) {
+      width: 28%; height: 28%;
+      border-color: rgba(201,64,119,0.7);
+      animation-duration: 3s;
+      animation-direction: reverse;
+    }
+    .ring-dot {
+      position: absolute;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      top: -4px; left: 50%;
+      transform: translateX(-50%);
+    }
+    .ring:nth-child(1) .ring-dot { background: var(--cyan); }
+    .ring:nth-child(2) .ring-dot { background: var(--gold); }
+    .ring:nth-child(3) .ring-dot { background: var(--violet); }
+    .ring:nth-child(4) .ring-dot { background: var(--rose); }
+    .ring-nucleus {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: radial-gradient(circle, white 0%, var(--cyan) 50%, transparent 70%);
+      box-shadow: 0 0 40px var(--cyan), 0 0 80px rgba(78,205,196,0.3);
+    }
+
+    .feature-text h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 700;
+      line-height: 1.2;
+      color: white;
+      margin-bottom: 1.5rem;
+    }
+    .feature-text h2 em { font-style: italic; color: var(--cyan); }
+    .feature-text p {
+      font-size: 1.05rem;
+      line-height: 1.85;
+      color: var(--text-dim);
+      margin-bottom: 1.2rem;
+    }
+    .feature-list {
+      list-style: none;
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+    .feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+      font-size: 1rem;
+      color: var(--text);
+    }
+    .feature-list li::before {
+      content: '→';
+      color: var(--cyan);
+      font-family: 'Space Mono', monospace;
+      flex-shrink: 0;
+    }
+
+    /* SPOILS / STRING SECTION */
+    .feature-spoils {
+      padding: 8rem 4rem;
+      overflow: hidden;
+    }
+    .feature-inner-rev {
+      max-width: 1300px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 7rem;
+      align-items: center;
+    }
+    .string-visual {
+      position: relative;
+      height: 460px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .string-canvas-wrap {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    canvas.strings { width: 100%; height: 100%; }
+
+    /* TIMELINE */
+    .timeline-section {
+      padding: 8rem 4rem;
+      background: var(--deep);
+    }
+    .timeline-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .timeline-header {
+      text-align: center;
+      margin-bottom: 5rem;
+    }
+    .timeline-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 900;
+      color: white;
+    }
+    .timeline-header h2 em { font-style: italic; color: var(--gold); }
+    .timeline {
+      position: relative;
+      padding-left: 3rem;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0; bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, var(--gold), var(--cyan), transparent);
+    }
+    .timeline-item {
+      position: relative;
+      padding-bottom: 4rem;
+      padding-left: 1.5rem;
+    }
+    .timeline-item:last-child { padding-bottom: 0; }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -1.5rem;
+      top: 0.5rem;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--dot-color, var(--gold));
+      box-shadow: 0 0 12px var(--dot-color, var(--gold));
+    }
+    .timeline-year {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+    }
+    .timeline-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 0.6rem;
+    }
+    .timeline-body { font-size: 0.97rem; line-height: 1.8; color: var(--text-dim); }
+
+    /* QUOTE */
+    .quote-block {
+      padding: 8rem 4rem;
+      text-align: center;
+      position: relative;
+    }
+    .quote-text {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.35;
+      color: white;
+      max-width: 900px;
+      margin: 0 auto 2rem;
+    }
+    .quote-mark {
+      font-size: 8rem;
+      line-height: 0;
+      color: var(--gold);
+      opacity: 0.2;
+      font-family: Georgia, serif;
+      position: absolute;
+      top: 5rem; left: 50%;
+      transform: translateX(-50%);
+    }
+    .quote-author {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    /* EXTRA THEORIES BENTO */
+    .bento {
+      padding: 6rem 4rem;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+    .bento-header {
+      margin-bottom: 3rem;
+    }
+    .bento-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 900;
+      color: white;
+    }
+    .bento-header h2 em { font-style: italic; color: var(--rose); }
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(2, auto);
+      gap: 1rem;
+    }
+    .bento-card {
+      background: var(--deep);
+      border: 1px solid var(--border);
+      padding: 2.2rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .bento-card:hover {
+      border-color: var(--accent, var(--gold));
+      transform: translateY(-3px);
+    }
+    .bento-card.wide { grid-column: span 2; }
+    .bento-card.tall { grid-row: span 2; }
+    .bento-bg-num {
+      position: absolute;
+      bottom: -1rem; right: 0.5rem;
+      font-family: 'Playfair Display', serif;
+      font-size: 8rem;
+      font-weight: 900;
+      color: rgba(255,255,255,0.025);
+      line-height: 1;
+      pointer-events: none;
+    }
+    .bento-icon { font-size: 2rem; margin-bottom: 1rem; }
+    .bento-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 0.7rem;
+    }
+    .bento-body { font-size: 0.9rem; line-height: 1.75; color: var(--text-dim); }
+
+    /* EQUATION BAND */
+    .eq-band {
+      padding: 3rem 0;
+      overflow: hidden;
+      white-space: nowrap;
+      background: var(--deep);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .eq-track {
+      display: inline-flex;
+      gap: 4rem;
+      animation: scroll-left 35s linear infinite;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+    }
+    .eq-track span { color: var(--gold); }
+
+    /* FOOTER */
+    footer {
+      position: relative;
+      z-index: 1;
+      padding: 5rem 4rem 3rem;
+      border-top: 1px solid var(--border);
+    }
+    .footer-inner {
+      max-width: 1300px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 4rem;
+    }
+    .footer-brand .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--gold);
+      display: block;
+      margin-bottom: 1rem;
+    }
+    .footer-brand .logo span { color: var(--cyan); }
+    .footer-brand p { font-size: 0.9rem; line-height: 1.75; color: var(--text-dim); }
+    .footer-col h4 {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li + li { margin-top: 0.7rem; }
+    .footer-col ul a {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .footer-col ul a:hover { color: var(--text); }
+    .footer-bottom {
+      max-width: 1300px;
+      margin: 3rem auto 0;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-bottom p {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+    @keyframes scroll-left {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px var(--cyan), 0 0 40px rgba(78,205,196,0.2); }
+      50%       { box-shadow: 0 0 40px var(--cyan), 0 0 80px rgba(78,205,196,0.4); }
+    }
+
+    /* REVEAL ON SCROLL */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      nav { padding: 1.2rem 2rem; }
+      .intro-strip, .feature-inner, .feature-inner-rev { grid-template-columns: 1fr; gap: 3rem; }
+      .cards-grid { grid-template-columns: 1fr 1fr; }
+      .bento-grid { grid-template-columns: 1fr 1fr; }
+      .bento-card.wide { grid-column: span 1; }
+      .footer-inner { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .theories, .bento, .intro-strip, .feature-quantum, .feature-spoils, .timeline-section, .quote-block { padding: 4rem 1.5rem; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .bento-grid { grid-template-columns: 1fr; }
+      .footer-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-trail" id="cursorTrail"></div>
+
+<!-- Starfield -->
+<canvas id="starfield"></canvas>
+
+<!-- Navigation -->
+<nav>
+  <a href="#" class="nav-logo">Shazz<span>.</span>Theory</a>
+  <ul class="nav-links">
+    <li><a href="#theories">Theories</a></li>
+    <li><a href="#quantum">Quantum</a></li>
+    <li><a href="#spoils">Spoils</a></li>
+    <li><a href="#timeline">History</a></li>
+    <li><a href="#more">More</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <p class="hero-eyebrow">Est. 2024 &nbsp;·&nbsp; Science &amp; Philosophy</p>
+  <h1 class="hero-title">
+    <span class="line1">Shazz Theory</span>
+    <span class="line2">The Universe, Decoded</span>
+  </h1>
+  <p class="hero-sub">An interdisciplinary platform exploring the deepest ideas in physics, cosmology, consciousness, and the nature of reality itself.</p>
+  <a href="#theories" class="hero-cta">Explore Theories <span class="arrow">→</span></a>
+</section>
+
+<!-- INTRO STRIP -->
+<section>
+  <div class="intro-strip reveal">
+    <div>
+      <p class="section-label">About Shazz Theory</p>
+      <h2 class="intro-heading">Where <em>science</em> meets the edge of<br>understanding</h2>
+      <div class="stat-row">
+        <div class="stat"><span class="stat-num">12+</span><span class="stat-lbl">Major Theories</span></div>
+        <div class="stat"><span class="stat-num">∞</span><span class="stat-lbl">Dimensions</span></div>
+        <div class="stat"><span class="stat-num">100B</span><span class="stat-lbl">Galaxies Studied</span></div>
+      </div>
+    </div>
+    <div class="intro-body">
+      <p>Shazz Theory is not a single idea — it is a framework for confronting the unknown. Built on rigorous physics, mathematical beauty, and a refusal to accept easy answers, this platform gathers the most profound theories humanity has ever conceived.</p>
+      <p>From the subatomic choreography of quantum mechanics to the grand tapestry of string theory, from the dark architecture of the cosmos to the spoils of entropy — each theory is a lens through which reality reveals a different face.</p>
+    </div>
+  </div>
+</section>
+
+<!-- EQUATION BAND -->
+<div class="eq-band">
+  <div class="eq-track">
+    <span>E = mc²</span>
+    <span>·</span>Ψ = ΣcₙΦₙ
+    <span>·</span>∇²Φ = 4πGρ
+    <span>·</span>ΔxΔp ≥ ℏ/2
+    <span>·</span>S = k·ln(W)
+    <span>·</span>ds² = −c²dt² + a²(t)dx²
+    <span>·</span>G_μν + Λg_μν = 8πT_μν
+    <span>·</span>
+    <span>E = mc²</span>
+    <span>·</span>Ψ = ΣcₙΦₙ
+    <span>·</span>∇²Φ = 4πGρ
+    <span>·</span>ΔxΔp ≥ ℏ/2
+    <span>·</span>S = k·ln(W)
+    <span>·</span>ds² = −c²dt² + a²(t)dx²
+    <span>·</span>G_μν + Λg_μν = 8πT_μν
+    <span>·</span>
+  </div>
+</div>
+
+<!-- THEORY CARDS -->
+<section id="theories">
+  <div class="theories reveal">
+    <div class="theories-header">
+      <p class="section-label">Core Frameworks</p>
+      <h2>The Grand <em>Theories</em></h2>
+      <p>Six pillars of modern scientific thought, presented in full depth.</p>
+    </div>
+    <div class="cards-grid">
+      <!-- Card 1 -->
+      <div class="theory-card" style="--accent-color:#4ecdc4;--icon-bg:rgba(78,205,196,0.1)">
+        <span class="card-num">01</span>
+        <div class="card-icon">⚛</div>
+        <h3 class="card-title">Quantum Mechanics</h3>
+        <p class="card-body">The science of the very small. Particles exist in superposition, entanglement defies locality, and observation collapses probability into reality. Nothing is certain until measured.</p>
+        <span class="card-tag">Physics · Subatomic</span>
+      </div>
+      <!-- Card 2 -->
+      <div class="theory-card" style="--accent-color:#c8a96e;--icon-bg:rgba(200,169,110,0.1)">
+        <span class="card-num">02</span>
+        <div class="card-icon">🌌</div>
+        <h3 class="card-title">Spoils Theory</h3>
+        <p class="card-body">The universe inherently moves toward disorder. Entropy governs the arrow of time. What was ordered shall be dissolved — yet from chaos, structure perpetually re-emerges.</p>
+        <span class="card-tag">Thermodynamics · Time</span>
+      </div>
+      <!-- Card 3 -->
+      <div class="theory-card" style="--accent-color:#7b5ea7;--icon-bg:rgba(123,94,167,0.1)">
+        <span class="card-num">03</span>
+        <div class="card-icon">🧵</div>
+        <h3 class="card-title">String Theory</h3>
+        <p class="card-body">Fundamental particles are not points but infinitesimal vibrating strings. The frequency of vibration determines what particle emerges. Reality is music played at Planck scale.</p>
+        <span class="card-tag">Unified Theory · 11D</span>
+      </div>
+      <!-- Card 4 -->
+      <div class="theory-card" style="--accent-color:#c94077;--icon-bg:rgba(201,64,119,0.1)">
+        <span class="card-num">04</span>
+        <div class="card-icon">🕳</div>
+        <h3 class="card-title">Relativity & Spacetime</h3>
+        <p class="card-body">Mass curves space. Speed dilates time. Black holes are not voids but extreme curvatures. The fabric of spacetime is a dynamic, living geometry shaped by energy.</p>
+        <span class="card-tag">Einstein · Gravity</span>
+      </div>
+      <!-- Card 5 -->
+      <div class="theory-card" style="--accent-color:#4ecdc4;--icon-bg:rgba(78,205,196,0.1)">
+        <span class="card-num">05</span>
+        <div class="card-icon">🌀</div>
+        <h3 class="card-title">Multiverse Theory</h3>
+        <p class="card-body">Every quantum event branches reality. Infinite parallel universes exist, each containing different outcomes of every decision ever made. You are one of countless versions of yourself.</p>
+        <span class="card-tag">Cosmology · Many Worlds</span>
+      </div>
+      <!-- Card 6 -->
+      <div class="theory-card" style="--accent-color:#c8a96e;--icon-bg:rgba(200,169,110,0.1)">
+        <span class="card-num">06</span>
+        <div class="card-icon">🧠</div>
+        <h3 class="card-title">Consciousness Theory</h3>
+        <p class="card-body">Does awareness emerge from matter, or is it fundamental? From integrated information theory to quantum consciousness — the hard problem of what it means to experience remains unsolved.</p>
+        <span class="card-tag">Neuroscience · Philosophy</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUANTUM FEATURE -->
+<section id="quantum">
+  <div class="feature-quantum">
+    <div class="feature-inner reveal">
+      <div class="feature-visual">
+        <div class="quantum-rings">
+          <div class="ring"><div class="ring-dot"></div></div>
+          <div class="ring"><div class="ring-dot"></div></div>
+          <div class="ring"><div class="ring-dot"></div></div>
+          <div class="ring"><div class="ring-dot"></div></div>
+          <div class="ring-nucleus"></div>
+        </div>
+      </div>
+      <div class="feature-text">
+        <p class="section-label">Deep Dive</p>
+        <h2><em>Quantum</em> Reality<br>Is Not What You Think</h2>
+        <p>Quantum mechanics overturned every classical intuition. At its core lies profound strangeness: particles tunnel through barriers, exist in multiple states simultaneously, and become instantly correlated across any distance.</p>
+        <p>The mathematics works with extraordinary precision — predicting experimental outcomes to one part in a trillion — yet no one agrees on what it actually means.</p>
+        <ul class="feature-list">
+          <li>Wave-particle duality and the double-slit experiment</li>
+          <li>Heisenberg Uncertainty: the limits of what can be known</li>
+          <li>Schrödinger's equation and quantum superposition</li>
+          <li>Bell's theorem and the death of local realism</li>
+          <li>Quantum entanglement: Einstein's "spooky action"</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SPOILS FEATURE -->
+<section id="spoils">
+  <div class="feature-spoils">
+    <div class="feature-inner-rev reveal">
+      <div class="feature-text">
+        <p class="section-label">Theory Focus</p>
+        <h2>Spoils Theory:<br><em>Entropy</em> as Architect</h2>
+        <p>In Spoils Theory, entropy is not just a direction — it is the fundamental driver of all change. The second law of thermodynamics declares that disorder must always increase in a closed system.</p>
+        <p>Yet paradoxically, local pockets of breathtaking order — stars, cells, minds — arise constantly, powered by the very flow of entropy that ultimately must dissolve them.</p>
+        <ul class="feature-list">
+          <li>The thermodynamic arrow of time</li>
+          <li>Maxwell's Demon and information entropy</li>
+          <li>Dissipative structures and self-organization</li>
+          <li>Heat death and the far future of the cosmos</li>
+          <li>Entropy and the origin of biological life</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <canvas class="strings" id="entropyCanvas" width="500" height="460"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section id="timeline">
+  <div class="timeline-section">
+    <div class="timeline-inner reveal">
+      <div class="timeline-header">
+        <p class="section-label">History of Ideas</p>
+        <h2>The <em>Timeline</em> of Theory</h2>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item" style="--dot-color:#c8a96e">
+          <p class="timeline-year">1687</p>
+          <h3 class="timeline-title">Newton's Principia Mathematica</h3>
+          <p class="timeline-body">The universe as clockwork — gravity, motion, and the laws that bind matter. A mechanical cosmos in which every effect has a calculable cause.</p>
+        </div>
+        <div class="timeline-item" style="--dot-color:#4ecdc4">
+          <p class="timeline-year">1865</p>
+          <h3 class="timeline-title">Maxwell's Equations & Entropy</h3>
+          <p class="timeline-body">Electromagnetism unified; the second law of thermodynamics formalized. The seeds of Spoils Theory take root — disorder is destiny.</p>
+        </div>
+        <div class="timeline-item" style="--dot-color:#7b5ea7">
+          <p class="timeline-year">1905</p>
+          <h3 class="timeline-title">Einstein's Miraculous Year</h3>
+          <p class="timeline-body">Special relativity, the photoelectric effect, and E=mc² — reality was renegotiated in twelve months. Space and time were no longer absolute.</p>
+        </div>
+        <div class="timeline-item" style="--dot-color:#c94077">
+          <p class="timeline-year">1927</p>
+          <h3 class="timeline-title">The Solvay Conference</h3>
+          <p class="timeline-body">Quantum mechanics arrives fully formed. Bohr, Heisenberg, and Einstein debate the nature of reality. The Copenhagen interpretation versus Einstein's hidden variables.</p>
+        </div>
+        <div class="timeline-item" style="--dot-color:#c8a96e">
+          <p class="timeline-year">1984</p>
+          <h3 class="timeline-title">The Superstring Revolution</h3>
+          <p class="timeline-body">String theory emerges as a candidate for the theory of everything — a framework uniting quantum mechanics with general relativity through vibrating strings in 10 dimensions.</p>
+        </div>
+        <div class="timeline-item" style="--dot-color:#4ecdc4">
+          <p class="timeline-year">2024</p>
+          <h3 class="timeline-title">Shazz Theory: Synthesis</h3>
+          <p class="timeline-body">A new interdisciplinary framework emerges — synthesizing quantum gravity, consciousness studies, cosmological entropy, and emergent complexity into a unified approach to understanding existence.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE -->
+<section class="quote-block reveal">
+  <span class="quote-mark">"</span>
+  <p class="quote-text">"Not only is the universe stranger than we think, it is stranger than we <em>can</em> think."</p>
+  <p class="quote-author">Werner Heisenberg &nbsp;·&nbsp; Physicist</p>
+</section>
+
+<!-- BENTO MORE THEORIES -->
+<section id="more">
+  <div class="bento reveal">
+    <div class="bento-header">
+      <p class="section-label">Extended Framework</p>
+      <h2>More <em>Theories</em> to Explore</h2>
+    </div>
+    <div class="bento-grid">
+      <div class="bento-card wide" style="--accent:#4ecdc4">
+        <div class="bento-bg-num">01</div>
+        <div class="bento-icon">🔁</div>
+        <h3 class="bento-title">Loop Quantum Gravity</h3>
+        <p class="bento-body">Spacetime itself is quantized — woven from discrete loops at the Planck scale. There is no fabric, only a spin network of interacting quanta of geometry. Time and space emerge from this background-independent weave.</p>
+      </div>
+      <div class="bento-card" style="--accent:#c8a96e">
+        <div class="bento-bg-num">02</div>
+        <div class="bento-icon">🌑</div>
+        <h3 class="bento-title">Dark Matter & Dark Energy</h3>
+        <p class="bento-body">95% of the universe is invisible. Dark matter holds galaxies together; dark energy tears them apart. We have mapped their effects with precision but have never detected their substance.</p>
+      </div>
+      <div class="bento-card" style="--accent:#7b5ea7">
+        <div class="bento-bg-num">03</div>
+        <div class="bento-icon">📡</div>
+        <h3 class="bento-title">Holographic Principle</h3>
+        <p class="bento-body">The entire information content of a volume of space can be encoded on its boundary. Reality may be a three-dimensional projection from a two-dimensional surface.</p>
+      </div>
+      <div class="bento-card" style="--accent:#c94077">
+        <div class="bento-bg-num">04</div>
+        <div class="bento-icon">🔮</div>
+        <h3 class="bento-title">Simulation Hypothesis</h3>
+        <p class="bento-body">If sufficiently advanced civilizations run detailed simulations, simulated minds will vastly outnumber real ones — suggesting we likely inhabit a computed reality.</p>
+      </div>
+      <div class="bento-card" style="--accent:#4ecdc4">
+        <div class="bento-bg-num">05</div>
+        <div class="bento-icon">💥</div>
+        <h3 class="bento-title">Big Bang Cosmology</h3>
+        <p class="bento-body">13.8 billion years ago, all matter, energy, space, and time emerged from a single infinitely dense point. The echoes of that birth still reach us as the cosmic microwave background.</p>
+      </div>
+      <div class="bento-card wide" style="--accent:#c8a96e">
+        <div class="bento-bg-num">06</div>
+        <div class="bento-icon">🌊</div>
+        <h3 class="bento-title">Chaos & Complexity Theory</h3>
+        <p class="bento-body">Tiny differences in initial conditions produce wildly divergent outcomes. Yet within the chaos, strange attractors and self-similar fractal structures emerge. Order hides inside disorder; sensitivity is universal.</p>
+      </div>
+      <div class="bento-card" style="--accent:#7b5ea7">
+        <div class="bento-bg-num">07</div>
+        <div class="bento-icon">🧬</div>
+        <h3 class="bento-title">Panpsychism</h3>
+        <p class="bento-body">Consciousness is not exclusive to brains — it is a fundamental feature of the universe, present at every level of matter and emerging as complexity grows.</p>
+      </div>
+      <div class="bento-card" style="--accent:#c94077">
+        <div class="bento-bg-num">08</div>
+        <div class="bento-icon">⏳</div>
+        <h3 class="bento-title">Block Universe Theory</h3>
+        <p class="bento-body">Past, present, and future all equally exist. Time does not flow — we merely move through it. Every moment that has ever occurred is eternally real and unchanged in the four-dimensional block.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EQUATION BAND 2 -->
+<div class="eq-band">
+  <div class="eq-track" style="animation-direction:reverse">
+    <span>H|Ψ⟩ = E|Ψ⟩</span>
+    <span>·</span>F = ma
+    <span>·</span>∮E·dA = Q/ε₀
+    <span>·</span>e^(iπ) + 1 = 0
+    <span>·</span>c = λν
+    <span>·</span>V = IR
+    <span>·</span>p = mv
+    <span>·</span>KE = ½mv²
+    <span>·</span>
+    <span>H|Ψ⟩ = E|Ψ⟩</span>
+    <span>·</span>F = ma
+    <span>·</span>∮E·dA = Q/ε₀
+    <span>·</span>e^(iπ) + 1 = 0
+    <span>·</span>c = λν
+    <span>·</span>V = IR
+    <span>·</span>p = mv
+    <span>·</span>KE = ½mv²
+    <span>·</span>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="logo">Shazz<span>.</span>Theory</span>
+      <p>An interdisciplinary platform at the intersection of physics, cosmology, philosophy, and mathematics — exploring the deepest questions ever posed.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Theories</h4>
+      <ul>
+        <li><a href="#">Quantum Mechanics</a></li>
+        <li><a href="#">Spoils Theory</a></li>
+        <li><a href="#">String Theory</a></li>
+        <li><a href="#">Relativity</a></li>
+        <li><a href="#">Multiverse</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="#">Research Papers</a></li>
+        <li><a href="#">Equations Library</a></li>
+        <li><a href="#">Visual Gallery</a></li>
+        <li><a href="#">Timeline</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Connect</h4>
+      <ul>
+        <li><a href="#">Newsletter</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Contribute</a></li>
+        <li><a href="#">About</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2024 Shazz Theory — All Rights Reserved</p>
+    <p>Curiosity is the engine of civilization</p>
+  </div>
+</footer>
+
+<script>
+  /* === CURSOR === */
+  const cursor = document.getElementById('cursor');
+  const trail = document.getElementById('cursorTrail');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+    trail.style.left = e.clientX + 'px';
+    trail.style.top = e.clientY + 'px';
+  });
+
+  /* === STARFIELD === */
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  function initStars() {
+    stars = Array.from({length: 200}, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.5,
+      a: Math.random(),
+      speed: Math.random() * 0.3 + 0.05,
+      twinkle: Math.random() * Math.PI * 2
+    }));
+  }
+  function drawStars() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    stars.forEach(s => {
+      s.twinkle += 0.02;
+      const alpha = s.a * (0.5 + 0.5 * Math.sin(s.twinkle));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(255,255,240,${alpha})`;
+      ctx.fill();
+      s.y -= s.speed * 0.1;
+      if (s.y < 0) { s.y = canvas.height; s.x = Math.random() * canvas.width; }
+    });
+    requestAnimationFrame(drawStars);
+  }
+  resizeCanvas(); initStars(); drawStars();
+  window.addEventListener('resize', () => { resizeCanvas(); initStars(); });
+
+  /* === ENTROPY CANVAS === */
+  const ec = document.getElementById('entropyCanvas');
+  if (ec) {
+    const ectx = ec.getContext('2d');
+    let particles = [];
+    function initEntropy() {
+      particles = Array.from({length: 80}, () => ({
+        x: ec.width/2 + (Math.random()-0.5)*80,
+        y: ec.height/2 + (Math.random()-0.5)*80,
+        vx: (Math.random()-0.5)*2,
+        vy: (Math.random()-0.5)*2,
+        r: Math.random()*3+1,
+        color: ['#4ecdc4','#c8a96e','#7b5ea7','#c94077'][Math.floor(Math.random()*4)],
+        alpha: Math.random()*0.7+0.3
+      }));
+    }
+    function drawEntropy() {
+      ectx.fillStyle = 'rgba(7,11,26,0.15)';
+      ectx.fillRect(0,0,ec.width,ec.height);
+      particles.forEach((p,i) => {
+        p.x += p.vx; p.y += p.vy;
+        p.vx += (Math.random()-0.5)*0.1;
+        p.vy += (Math.random()-0.5)*0.1;
+        if (p.x<0||p.x>ec.width) p.vx*=-1;
+        if (p.y<0||p.y>ec.height) p.vy*=-1;
+        ectx.beginPath();
+        ectx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ectx.fillStyle = p.color;
+        ectx.globalAlpha = p.alpha;
+        ectx.fill();
+        ectx.globalAlpha = 1;
+        // Draw connections
+        particles.slice(i+1).forEach(q => {
+          const dx = p.x-q.x, dy = p.y-q.y;
+          const dist = Math.sqrt(dx*dx+dy*dy);
+          if (dist < 80) {
+            ectx.beginPath();
+            ectx.moveTo(p.x,p.y); ectx.lineTo(q.x,q.y);
+            ectx.strokeStyle = p.color;
+            ectx.globalAlpha = (1-dist/80)*0.35;
+            ectx.lineWidth = 0.5;
+            ectx.stroke();
+            ectx.globalAlpha = 1;
+          }
+        });
+      });
+      requestAnimationFrame(drawEntropy);
+    }
+    initEntropy(); drawEntropy();
+  }
+
+  /* === SCROLL REVEAL === */
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  revealEls.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
